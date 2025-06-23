@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<schemalist>
+  <schema path="@resource@/" id="@domain@">
+    <key name="nixpkgs-branch" type="s">
+      <default>'nixpkgs'</default>
+    </key>
+  </schema>
+</schemalist>

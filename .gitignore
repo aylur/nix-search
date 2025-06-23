@@ -1,0 +1,4 @@
+build/
+dist/
+result
+node_modules/

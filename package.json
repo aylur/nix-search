@@ -1,0 +1,35 @@
+{
+  "type": "module",
+  "author": "Aylur",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Aylur/nixpkgs-search.git"
+  },
+  "funding": {
+    "type": "kofi",
+    "url": "https://ko-fi.com/aylur"
+  },
+  "devDependencies": {
+    "@eslint/js": "latest",
+    "@girs/adw-1": "latest",
+    "esbuild": "latest",
+    "eslint": "latest",
+    "typescript": "latest",
+    "typescript-eslint": "latest"
+  },
+  "scripts": {
+    "lint": "eslint . --fix",
+    "build": "meson setup --prefix \"$(pwd)/dist\" build --wipe ; meson install -C build",
+    "dev": "pnpm run build && GSETTINGS_SCHEMA_DIR=\"$(pwd)/dist/share/glib-2.0/schemas\" ./dist/bin/nix-search"
+  },
+  "dependencies": {
+    "gnim": "latest",
+    "fuse.js": "latest"
+  },
+  "prettier": {
+    "semi": false,
+    "tabWidth": 2,
+    "printWidth": 100
+  }
+}

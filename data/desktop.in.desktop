@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Nix Search
+Comment=Search for packages on nixpkgs
+Type=Application
+Exec=@exe@
+Terminal=false
+Categories=Utility;GTK;GNOME;
+Keywords=Nix;Search;
+Icon=nix-snowflake
+StartupNotify=true
+DBusActivatable=true
