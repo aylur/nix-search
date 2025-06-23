@@ -4,5 +4,11 @@
     <key name="nixpkgs-branch" type="s">
       <default>'nixpkgs'</default>
     </key>
+    <key name="exit-on-launch" type="b">
+      <default>true</default>
+    </key>
+    <key name="cache-timestamps" type="a{su}">
+      <default>{}</default>
+    </key>
   </schema>
 </schemalist>

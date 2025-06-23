@@ -4,7 +4,7 @@ import { register } from "gnim/gobject"
 import { createRoot } from "gnim"
 import SearchProvider from "./SearchProvider"
 import AppWindow from "./AppWindow"
-import { createSettings, SettingsContext } from "./settings"
+import { initSettings } from "./settings"
 import { NixSearch } from "./nix"
 
 @register({ GTypeName: "App" })
@@ -22,28 +22,28 @@ export class App extends Adw.Application {
   vfunc_startup(): void {
     super.vfunc_startup()
 
+    initSettings()
+
     createRoot((dispose) => {
       this.connect("shutdown", dispose)
 
-      SettingsContext.provide(createSettings(), () => {
-        const nix = new NixSearch()
+      const nix = new NixSearch()
 
-        const win = (this.window = new AppWindow({
-          application: this,
-          nixSearch: nix,
-        }))
+      const win = (this.window = new AppWindow({
+        application: this,
+        nixSearch: nix,
+      }))
 
-        this.provider = new SearchProvider({
-          nixSearch: nix,
-          onServeFailed: (error) => {
-            console.error(error)
-            this.quit()
-          },
-          onLaunchSearch: (term) => {
-            win.searchText = term
-            win.present()
-          },
-        })
+      this.provider = new SearchProvider({
+        nixSearch: nix,
+        onServeFailed: (error) => {
+          console.error(error)
+          this.quit()
+        },
+        onLaunchSearch: (term) => {
+          win.searchText = term
+          win.present()
+        },
       })
     })
   }
