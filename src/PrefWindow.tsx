@@ -1,13 +1,13 @@
 import Adw from "gi://Adw"
-import { settings } from "./settings"
+import { useSettings } from "./settings"
 
 type PrefWindowProps = {
   ref: (self: Adw.Dialog) => void
 }
 
 export default function PrefWindow({ ref }: PrefWindowProps) {
-  const { nixpkgsBranch, setNixpkgsBranch, exitOnLaunch, setExitOnLaunch, clearCacheTimestamps } =
-    settings
+  const { nixpkgsBranch, setNixpkgsBranch, exitOnLaunch, setExitOnLaunch, setCacheTimestamps } =
+    useSettings()
 
   return (
     <Adw.PreferencesDialog $={ref}>
@@ -24,7 +24,7 @@ export default function PrefWindow({ ref }: PrefWindowProps) {
             active={exitOnLaunch}
             onNotifyActive={({ active }) => setExitOnLaunch(active)}
           />
-          <Adw.ButtonRow title={_("Clear Cache")} onActivated={clearCacheTimestamps} />
+          <Adw.ButtonRow title={_("Clear Cache")} onActivated={() => setCacheTimestamps({})} />
         </Adw.PreferencesGroup>
       </Adw.PreferencesPage>
     </Adw.PreferencesDialog>

@@ -3,9 +3,9 @@ import Gtk from "gi://Gtk"
 import Gdk from "gi://Gdk"
 import { createBinding, createComputed, For, getScope, This } from "gnim"
 import { property, register } from "gnim/gobject"
-import { settings } from "./settings"
 import { Nixpkg, NixSearch } from "./nix"
 import PrefWindow from "./PrefWindow"
+import { useSettings } from "./settings"
 
 interface AppWindowProps {
   application: Adw.Application
@@ -20,7 +20,7 @@ export default class AppWindow extends Adw.ApplicationWindow {
     super({ application })
     const scope = getScope()
 
-    const { nixpkgsBranch, exitOnLaunch } = settings
+    const { nixpkgsBranch, exitOnLaunch } = useSettings()
 
     const visibleChildName = createComputed(
       [nixSearch, createBinding(this, "searchText")],

@@ -2,7 +2,7 @@ import Gio from "gi://Gio"
 import GLib from "gi://GLib"
 import Fuse from "fuse.js/basic"
 import { Accessor, createState, onCleanup } from "gnim"
-import { settings } from "./settings"
+import { Settings, useSettings } from "./settings"
 
 Gio._promisify(Gio.File.prototype, "create_async")
 Gio._promisify(Gio.File.prototype, "load_contents_async")
@@ -39,18 +39,22 @@ function exec(argv: string[]): Promise<string> {
   })
 }
 
-async function getCache(branch: string) {
+async function getCache(settings: Settings) {
+  const branch = settings.nixpkgsBranch.get()
+  const cache = settings.cacheTimestamps.get()
+
   const filePath = `${cacheDir}/${branch}.json`
+  const dir = GLib.path_get_dirname(filePath)
   const now = GLib.DateTime.new_now_local().to_unix()
-  const timestamp = settings.cacheTimestamps.get()[branch] ?? 0
+  const timestamp = cache[branch] ?? 0
   const exists = GLib.file_test(filePath, GLib.FileTest.EXISTS)
 
   try {
     if (timestamp < now || !exists) {
-      settings.setCacheTimestamp(branch, now)
+      settings.setCacheTimestamps((prev) => ({ ...prev, [branch]: now }))
 
-      if (!GLib.file_test(cacheDir, GLib.FileTest.IS_DIR)) {
-        await Gio.File.new_for_path(cacheDir).make_directory_async(GLib.PRIORITY_DEFAULT, null)
+      if (!GLib.file_test(dir, GLib.FileTest.IS_DIR)) {
+        await Gio.File.new_for_path(dir).make_directory_async(GLib.PRIORITY_DEFAULT, null)
       }
 
       const pkgs = await exec(["nix", "search", branch, "^", "--json"])
@@ -77,8 +81,8 @@ async function getCache(branch: string) {
   }
 }
 
-async function getPackages(branch: string) {
-  const pkgs = (await getCache(branch)) as Record<string, Omit<Nixpkg, "id">>
+async function getPackages(settings: Settings) {
+  const pkgs = (await getCache(settings)) as Record<string, Omit<Nixpkg, "id">>
   const list = Object.entries(pkgs).map(([id, pkg]) => ({ id: id.replace(prefix, ""), ...pkg }))
   const dict = Object.fromEntries(list.map((pkg) => [pkg.id, pkg]))
   return [list, dict] as const
@@ -101,15 +105,16 @@ export class NixSearch extends Accessor<Array<Nixpkg>> {
         return () => this.subscribers.delete(callback)
       },
     )
-    const branch = settings.nixpkgsBranch
+
+    const settings = useSettings()
     const [loading, setLoading] = createState(true)
     this.loading = loading
 
     const init = async () => {
       setLoading(true)
       try {
-        const [list, dict] = await getPackages(branch.get())
-        this.branch = branch.get()
+        const [list, dict] = await getPackages(settings)
+        this.branch = settings.nixpkgsBranch.get()
         this.pkgs = dict
         this.fuse = new Fuse(list, { keys: ["id"] })
         setLoading(false)
@@ -119,8 +124,8 @@ export class NixSearch extends Accessor<Array<Nixpkg>> {
     }
 
     init()
-    onCleanup(branch.subscribe(init))
-    onCleanup(settings.onClear(init))
+    onCleanup(settings.nixpkgsBranch.subscribe(init))
+    onCleanup(settings.cacheTimestamps.subscribe(init))
   }
 
   setSearch(pattern: string) {

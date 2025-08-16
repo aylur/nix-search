@@ -13,6 +13,7 @@
   "devDependencies": {
     "@eslint/js": "latest",
     "@girs/adw-1": "latest",
+    "@girs/gjs": "latest",
     "esbuild": "latest",
     "eslint": "latest",
     "typescript": "latest",
